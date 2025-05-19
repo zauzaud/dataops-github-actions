@@ -7,27 +7,21 @@ services:
       POSTGRES_DB: meu_db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 3
     networks:
       - app-network
 
-  python-service:
-    build: ./app # Apontando para a pasta app
-    networks:
-      - app-network
-    depends_on:
-      - db
-
-  api:
-    build: ./app # Também usa a pasta app
+  web:
+    build: .
     ports:
-      - "5000:5000"
+      - "80:80"
     networks:
       - app-network
     depends_on:
-      - db
-      - python-service
-    command: ["python", "app.py"]
+      db:
+        condition: service_healthy
 
 networks:
   app-network:
