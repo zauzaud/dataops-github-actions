@@ -15,6 +15,7 @@ services:
 
   web:
     build: .
+    network_mode: "host"
     ports:
       - "80:80"
     networks:
