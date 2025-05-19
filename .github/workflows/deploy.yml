@@ -13,12 +13,15 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Testar conexão SSH com netcat
+      - name: Testar conexão SSH
         run: |
-          echo "Testando conexão com porta 22..."
-          nc -zv -w 5 ${{ secrets.SERVER_HOST }} 22 || echo "Falha na conexão com a porta 22 (SSH não acessível)"
+          echo "🛜 Testando conectividade básica..."
+          nc -zv -w 5 ${{ secrets.SERVER_HOST }} 22 || {
+            echo "❌ Falha na conexão SSH";
+            exit 1;
+          }
 
-      - name: Conectar com a VM e fazer o deploy
+      - name: Deploy na VM
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -27,6 +30,14 @@ jobs:
           port: 22
           script: |
             cd /home/${{ secrets.SERVER_USER }}/dataops-github-actions
+
+            echo "🔄 Atualizando repositório..."
             git pull origin main
-            docker compose down || true
-            docker compose up -d --build
+
+            echo "🐋 Reconstruindo containers..."
+            docker compose build --no-cache && 
+            docker compose down --remove-orphans &&
+            docker compose up -d --force-recreate
+
+            echo "✅ Deploy concluído!"
+            docker compose ps

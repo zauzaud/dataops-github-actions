@@ -1,37 +1,33 @@
-version: "3"
-
 services:
   db:
-    image: postgres:12
+    image: postgres:15
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=meu_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: meu_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
     networks:
       - app-network
 
   python-service:
-    image: python-service:latest # Tive que adicionar a referência da imagem porque o stack deploy não suporta build
-    deploy:
-      replicas: 1
-    depends_on:
-      - db
+    build: ./app # Apontando para a pasta app
     networks:
       - app-network
+    depends_on:
+      - db
 
   api:
-    image: python-service:latest
+    build: ./app # Também usa a pasta app
     ports:
       - "5000:5000"
-    deploy:
-      replicas: 3
+    networks:
+      - app-network
     depends_on:
       - db
       - python-service
-    networks:
-      - app-network
     command: ["python", "app.py"]
 
 networks:
   app-network:
-    driver: overlay
