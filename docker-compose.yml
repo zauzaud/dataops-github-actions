@@ -7,15 +7,12 @@ services:
       POSTGRES_DB: meu_db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
+      interval: 10s
     networks:
       - app-network
 
   web:
-    build: .
-    network_mode: "host"
+    build: ./app
     ports:
       - "80:80"
     networks:
