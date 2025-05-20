@@ -29,7 +29,7 @@ class Multiplicacao(Resource):
         """Multiplica dois números"""
         dados = request.get_json()
         return {"resultado": dados['num1'] * dados['num2']}, 200
-
+## deixei a rota de clientes do exercicio 1
 @ns_db.route('/')
 class Clientes(Resource):
     def get(self):
